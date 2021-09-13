@@ -1,0 +1,45 @@
+name: 'Alien-Works Delivery'
+description: 'Framework for bundling Common Lisp software'
+inputs:
+  bundle-def-system:
+    description: |
+      ASDF system with delivery bundle definition
+    required: true
+  bundle-name:
+    description: |
+      Name of the bundle to deliver
+    required: true
+  bundle-type:
+    description: |
+      Type of bundle to deliver:
+        * appimage
+    required: true
+  lisp:
+    description: |
+      Implementation to build application bundle with:
+        * sbcl - official package provided by SBCL developers
+        * sbcl_ros - SBCL package provided by roswell maintainers
+    required: true
+    default: sbcl
+outputs:
+  bundle:
+    description: "Path to Common Lisp application bundle"
+    value: ${{ steps.output.bundle }}
+runs:
+  using: "composite"
+  steps:
+    - id: install-lisp
+      uses: boroactions/lisp@v0
+      with:
+        lisp: ${{ inputs.lisp }}
+    - id: install-lisp-scripting
+      uses: boroactions/lisp-scripting@v0
+      with:
+        lisp: ${{ steps.install-lisp.outputs.lisp }}
+    - run: echo "AWD_BUNDLE_FILE=$RUNNER_TEMP/${{ inputs.bundle-name }}" >> $GITHUB_ENV
+      shell: sh
+    - run: ${{ github.action_path }}/deliver.sh ${{ inputs.bundle-def-system }} ${{ inputs.bundle-name }} ${{ inputs.bundle-type }}
+      shell: sh
+    - id: output
+      run: echo "::set-output name=bundle::$AWD_BUNDLE_FILE"
+      shell: sh
