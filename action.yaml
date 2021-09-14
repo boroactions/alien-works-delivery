@@ -24,7 +24,7 @@ inputs:
 outputs:
   bundle:
     description: "Path to Common Lisp application bundle"
-    value: ${{ steps.output.bundle }}
+    value: ${{ steps.output.outputs.bundle }}
 runs:
   using: "composite"
   steps:
@@ -36,6 +36,8 @@ runs:
       uses: boroactions/lisp-scripting@v0
       with:
         lisp: ${{ steps.install-lisp.outputs.lisp }}
+    - run: ${{ github.action_path }}/prepare.sh
+      shell: sh
     - run: echo "AWD_BUNDLE_FILE=$RUNNER_TEMP/${{ inputs.bundle-name }}" >> $GITHUB_ENV
       shell: sh
     - run: ${{ github.action_path }}/deliver.sh ${{ inputs.bundle-def-system }} ${{ inputs.bundle-name }} ${{ inputs.bundle-type }}

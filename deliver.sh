@@ -27,4 +27,4 @@
 (ql:quickload `(,bundle-def-system ,(keywordify (string+ :alien-works-delivery/ bundle-type))))
 (alien-works-delivery:assemble-delivery-bundle bundle-name (keywordify bundle-type) *bundler*)
 
-($ "$LISP" "--eval" (format nil "(load \"~A\" :external-format :ascii)" (namestring *bundler*)))
+($ "$LISP" "--eval" (format nil "(load \\\"~A\\\" :external-format :ascii)" (namestring *bundler*)))
