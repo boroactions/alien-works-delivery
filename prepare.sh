@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+APPIMAGETOOL_URL=https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage
+
+mkdir -p $AWD_ACTION_BINDIR
+
 case "$RUNNER_OS" in
     Linux*)
         sudo apt-get install -y \
@@ -8,6 +12,9 @@ case "$RUNNER_OS" in
              libwayland-dev \
              libx11-dev libxcursor-dev libxext-dev libxi-dev libxinerama-dev libxkbcommon-dev \
              libxrandr-dev libxt-dev libxv-dev libxxf86vm-dev
+        curl -L "$APPIMAGETOOL_URL" \
+             --output $AWD_ACTION_BINDIR/appimagetool \
+            && chmod +x $AWD_ACTION_BINDIR/appimagetool
     ;;
     *)
         echo "Unsupported OS: $RUNNER_OS"

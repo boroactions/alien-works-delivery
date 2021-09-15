@@ -21,6 +21,10 @@ inputs:
         * sbcl_ros - SBCL package provided by roswell maintainers
     required: true
     default: sbcl
+  bundle-file:
+    description: |
+      Output file name for a resulting bundle.
+    required: false
 outputs:
   bundle:
     description: "Path to Common Lisp application bundle"
@@ -29,19 +33,31 @@ runs:
   using: "composite"
   steps:
     - id: install-lisp
+      name: Install Lisp
       uses: boroactions/lisp@v0
       with:
         lisp: ${{ inputs.lisp }}
     - id: install-lisp-scripting
+      name: Install Lisp Scripting
       uses: boroactions/lisp-scripting@v0
       with:
         lisp: ${{ steps.install-lisp.outputs.lisp }}
-    - run: ${{ github.action_path }}/prepare.sh
+    - name: Inject Action Bin Directory To Env
+      run: echo "AWD_ACTION_BINDIR=${{ github.workspace }}/.boroactions/alien-works-delivery/v0/bin/" >> $GITHUB_ENV
       shell: sh
-    - run: echo "AWD_BUNDLE_FILE=$RUNNER_TEMP/${{ inputs.bundle-name }}" >> $GITHUB_ENV
+    - name: Inject Action Bin Directory To Path
+      run: echo "${{ env.AWD_ACTION_BINDIR  }}" >> $GITHUB_PATH
       shell: sh
-    - run: ${{ github.action_path }}/deliver.sh ${{ inputs.bundle-def-system }} ${{ inputs.bundle-name }} ${{ inputs.bundle-type }}
+    - name: Preapre Build Environment
+      run: ${{ github.action_path }}/prepare.sh
+      shell: sh
+    - name: Set Bundle File Name
+      run: AWD_BUNDLE_FILE="${{ inputs.bundle-file }}" && if [ -z "$AWD_BUNDLE_FILE" ]; then AWD_BUNDLE_FILE="$RUNNER_TEMP/${{ inputs.bundle-name }}"; fi && echo "AWD_BUNDLE_FILE=$AWD_BUNDLE_FILE" >> $GITHUB_ENV
+      shell: sh
+    - name: Run Alien-Works-Delivery System
+      run: ${{ github.action_path }}/deliver.sh ${{ inputs.bundle-def-system }} ${{ inputs.bundle-name }} ${{ inputs.bundle-type }}
       shell: sh
     - id: output
+      name: Set Action Outputs
       run: echo "::set-output name=bundle::$AWD_BUNDLE_FILE"
       shell: sh
